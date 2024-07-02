@@ -18,7 +18,7 @@ class SignupView(APIView):
         password2 = data['password2']
 
         # Regex pattern for email validation
-        email_pattern = r'^[\w\.-]+@[a-zA-Z\d\.-]+\.[a-zA-Z]{2,}$'  # Basic email regex pattern
+        email_pattern = r'^[\w\.-]+@[a-zA-Z\d\.-]+\.[a-zA-Z]{2,}$'  
 
         # Regex pattern for password validation (at least 6 characters with letters, numbers, and symbols)
         password_pattern = r'^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$'

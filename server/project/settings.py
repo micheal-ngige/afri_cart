@@ -42,8 +42,9 @@ INSTALLED_APPS = [
     'account',
 
     'rest_framework',
-    "corsheaders",
     'rest_framework_simplejwt',
+    "corsheaders",
+    
 ]
 
 MIDDLEWARE = [
@@ -153,8 +154,7 @@ REST_FRAMEWORK = {
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-CORS_ALLOWED_ORIGINS = True
+CORS_ORIGIN_ALLOW_ALL = True
 
 FILE_UPLOAD_PERMISSIONS=0o640
-
-# AUTH_USER_MODEL ='account.UserAccount'
+AUTH_USER_MODEL ='account.UserAccount'
