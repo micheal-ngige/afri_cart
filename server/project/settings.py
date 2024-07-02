@@ -38,7 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-    'lisitng',
+    'listing',
     'account',
 
     'rest_framework',
@@ -157,4 +157,4 @@ CORS_ALLOWED_ORIGINS = True
 
 FILE_UPLOAD_PERMISSIONS=0o640
 
-AUTH_USER_MODEL ='account.UserAccount'
+# AUTH_USER_MODEL ='account.UserAccount'
