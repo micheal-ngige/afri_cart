@@ -1,45 +1,93 @@
 import re
 from django.contrib.auth import get_user_model
-from rest_framework.response import Response
+from .serializers import UserSerializer
 from rest_framework.views import APIView
-from rest_framework import permissions
+from rest_framework.response import Response
+from rest_framework import permissions, status
 
 User = get_user_model()
 
-class SignupView(APIView):
+class RegisterView(APIView):
     permission_classes = (permissions.AllowAny, )
 
-    def post(self, request, format=None):
-        data = self.request.data
+    def post(self, request):
+        try:
+            data = request.data
 
-        name = data['name']
-        email = data['email']
-        password = data['password']
-        password2 = data['password2']
+            name = data['name']
+            email = data['email']
+            email = email.lower()
+            password = data['password']
+            re_password = data['re_password']
+            is_merchant = data['is_merchant']
 
-        # Regex pattern for email validation
-        email_pattern = r'^[\w\.-]+@[a-zA-Z\d\.-]+\.[a-zA-Z]{2,}$'  
+            if is_merchant == 'True':
+                is_merchant = True
+            else:
+                is_merchant = False
 
-        # Regex pattern for password validation (at least 6 characters with letters, numbers, and symbols)
-        password_pattern = r'^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$'
+            # Define regex patterns
+            email_regex = r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$'
+            password_regex = r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$'
+            # Minimum eight characters, at least one uppercase letter, one lowercase letter, one number and one special character
 
-        # Validate email
-        if not re.match(email_pattern, email):
-            return Response({'error': 'Email is not valid'})
+            # Validate email and password using regex
+            if not re.match(email_regex, email):
+                return Response(
+                    {'error': 'Invalid email format'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
 
-        # Validate password
-        if not re.match(password_pattern, password):
-            return Response({'error': 'Password must contain at least 6 characters with letters, numbers, and symbols'})
+            if not re.match(password_regex, password):
+                return Response(
+                    {'error': 'Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
 
-        # Check if passwords match
-        if password != password2:
-            return Response({'error': 'Passwords do not match'})
+            if password == re_password:
+                if not User.objects.filter(email=email).exists():
+                    if not is_merchant:
+                        User.objects.create_user(name=name, email=email, password=password)
 
-        # Check if email already exists
-        if User.objects.filter(email=email).exists():
-            return Response({'error': 'Email already exists'})
+                        return Response(
+                            {'success': 'User created successfully'},
+                            status=status.HTTP_201_CREATED
+                        )
+                    else:
+                        User.objects.create_merchant(name=name, email=email, password=password)
 
-        # Create user if all validations pass
-        user = User.objects.create_user(email=email, password=password, name=name)
-        user.save()
-        return Response({'success': 'User created successfully'})
+                        return Response(
+                            {'success': 'merchant account created successfully'},
+                            status=status.HTTP_201_CREATED
+                        )
+                else:
+                    return Response(
+                        {'error': 'User with this email already exists'},
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+            else:
+                return Response(
+                    {'error': 'Passwords do not match'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+        except:
+            return Response(
+                {'error': 'Something went wrong when registering an account'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+class RetrieveUserView(APIView):
+    def get(self, request, format=None):
+        try:
+            user = request.user
+            user = UserSerializer(user)
+
+            return Response(
+                {'user': user.data},
+                status=status.HTTP_200_OK
+            )
+        except:
+            return Response(
+                {'error': 'Something went wrong when retrieving user details'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
