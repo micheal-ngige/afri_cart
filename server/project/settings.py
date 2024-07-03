@@ -40,6 +40,7 @@ INSTALLED_APPS = [
 
     'listing',
     'account',
+    'merchants',
 
     'rest_framework',
     'rest_framework_simplejwt',
