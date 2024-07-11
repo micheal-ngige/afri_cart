@@ -19,17 +19,11 @@ class RegisterView(APIView):
             email = email.lower()
             password = data['password']
             re_password = data['re_password']
-            is_merchant = data['is_merchant']
-
-            if is_merchant == 'True':
-                is_merchant = True
-            else:
-                is_merchant = False
+            is_merchant = data.get('is_merchant', False)  # Use get method with default value
 
             # Define regex patterns
             email_regex = r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$'
             password_regex = r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$'
-            # Minimum eight characters, at least one uppercase letter, one lowercase letter, one number and one special character
 
             # Validate email and password using regex
             if not re.match(email_regex, email):
@@ -44,37 +38,45 @@ class RegisterView(APIView):
                     status=status.HTTP_400_BAD_REQUEST
                 )
 
-            if password == re_password:
-                if not User.objects.filter(email=email).exists():
-                    if not is_merchant:
-                        User.objects.create_user(name=name, email=email, password=password)
-
-                        return Response(
-                            {'success': 'User created successfully'},
-                            status=status.HTTP_201_CREATED
-                        )
-                    else:
-                        User.objects.create_merchant(name=name, email=email, password=password)
-
-                        return Response(
-                            {'success': 'merchant account created successfully'},
-                            status=status.HTTP_201_CREATED
-                        )
-                else:
-                    return Response(
-                        {'error': 'User with this email already exists'},
-                        status=status.HTTP_400_BAD_REQUEST
-                    )
-            else:
+            if password != re_password:
                 return Response(
                     {'error': 'Passwords do not match'},
                     status=status.HTTP_400_BAD_REQUEST
                 )
-        except:
+
+            # Check if user with email already exists
+            if User.objects.filter(email=email).exists():
+                return Response(
+                    {'error': 'User with this email already exists'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            # Create user or merchant based on is_merchant flag
+            if not is_merchant:
+                User.objects.create_user(name=name, email=email, password=password)
+                return Response(
+                    {'success': 'User created successfully'},
+                    status=status.HTTP_201_CREATED
+                )
+            else:
+                User.objects.create_merchant(name=name, email=email, password=password)
+                return Response(
+                    {'success': 'Merchant account created successfully'},
+                    status=status.HTTP_201_CREATED
+                )
+
+        except KeyError as e:
             return Response(
-                {'error': 'Something went wrong when registering an account'},
+                {'error': f'Missing required field: {e}'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        except Exception as e:
+            return Response(
+                {'error': str(e)},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+
 
 class RetrieveUserView(APIView):
     def get(self, request, format=None):
