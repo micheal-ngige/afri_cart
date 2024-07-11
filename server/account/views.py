@@ -28,7 +28,7 @@ class RegisterView(APIView):
 
             # Define regex patterns
             email_regex = r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$'
-            password_regex = r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$'
+            password_regex = r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$'
             # Minimum eight characters, at least one uppercase letter, one lowercase letter, one number and one special character
 
             # Validate email and password using regex
@@ -40,7 +40,7 @@ class RegisterView(APIView):
 
             if not re.match(password_regex, password):
                 return Response(
-                    {'error': 'Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character'},
+                    {'error': 'Password must be at least 6 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character'},
                     status=status.HTTP_400_BAD_REQUEST
                 )
 
