@@ -6,3 +6,7 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+
+
+# Ignore specific .py file
+keys.py

@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'listing',
     'account',
     'merchants',
+    'lnmpesa',
   
 
     'rest_framework',
