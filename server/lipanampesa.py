@@ -1,43 +1,16 @@
-import base64
-from datetime import datetime 
-
-
+from access_token import generate_access_token
+from password import generate_password
+from utils import convert_time
 import requests
-
 import keys
 
 
-
-unformatted_time = datetime.now()
-formatted_time = unformatted_time.strftime("%Y%m%d%H%M%S")
-# print(formatted_time)
-# 20240716152601
-
-data_to_encode = keys.business_shortCode +  keys.lipa_na_mpesa_passkey + formatted_time
-
-encoded_string = base64.b64encode(data_to_encode.encode())
-# print(encoded_string) b'MTc0Mzc5YmZiMjc5ZjlhYTliZGJjZjE1OGU5N2RkNzFhNDY3Y2QyZTBjODkzMDU5YjEwZjc4ZTZiNzJhZGExZWQyYzkxOTIwMjQwNzE2MTU0MjM2'
-
-decoded_password= encoded_string.decode('utf-8')
-print(decoded_password)
-
-
-
-
-
-response = requests.request("GET", 'https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials', headers = { 'Authorization': 'Basic NHNncFp0ZHM3TWlkakxHUGFkQXFSVmlSYzhvYU9QZUR4aThaVVcyVWVFMFJFWVQ4OndIRUk0cW9ERzB1R2N6cXhIdlhpSnJ1eTZDMlJhN2UySnNIR0FJOENzQWtRbTJvTnRRcnZjYldjOERUSFliMzQ=' })
-
-# print(response.json())
- 
-
-json_response = response.json() # {'access_token': 'ojslQT7okiHLKofeCVidWASwok2G', 'expires_in': '3599'}
-my_access_token = json_response['access_token']
-
-# print(my_access_token)
+formatted_time = convert_time()
+decoded_password = generate_password(formatted_time)
 
 def lipa_na_mpesa():   
 
-    access_token = my_access_token
+    access_token = generate_access_token()
     api_url = "https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest"
 
     headers = {"Authorization": "Bearer %s" % access_token}
